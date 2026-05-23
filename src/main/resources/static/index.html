@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Telemetry Dashboard</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #111; color: #0f0; margin: 0; padding: 20px; }
+        #data { white-space: pre-wrap; font-family: monospace; font-size: 1.2em; }
+    </style>
+</head>
+
+<body>
+<h1>🚀 Live Telemetry Dashboard</h1>
+
+<div class="controls">
+    <input type="text" id="sessionName" placeholder="Test Name" />
+    <button class="start" onclick="startRecording()">Start Recording</button>
+    <button class="stop" onclick="stopRecording()">Stop Recording</button>
+    <span id="recordingStatus" class="status"></span>
+</div>
+
+<div class="mode-selector">
+    <button class="mode-btn active" id="btn-standby" onclick="setMode('standby')">Standby</button>
+    <button class="mode-btn" id="btn-live" onclick="setMode('live')">LIVE</button>
+    <button class="mode-btn" id="btn-test" onclick="setMode('test')">TEST</button>
+</div>
+
+<div class="container" id="liveDashboard"></div>
+
+<p style="text-align: center; margin-top: 30px;">
+    <a href="history.html" class="button">View Past Recordings →</a>
+</p>
+
+<script>
+    let ws;
+    let isTestMode = false;
+
+    function connectWebSocket() {
+        ws = new WebSocket("ws://localhost:8080/telemetry");
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            updateLiveDashboard(data);
+        };
+    }
+
+function updateLiveDashboard(data) {
+        document.getElementById("liveDashboard").innerHTML = `
+            <div class="card">
+                <div class="label">Altitude</div>
+                <div class="value">${data.altitude ? data.altitude.toFixed(1) : '—'} <small>m</small></div>
+            </div>
+            <div class="card">
+                <div class="label">Velocity</div>
+                <div class="value">${data.velocity ? data.velocity.toFixed(1) : '—'} <small>m/s</small></div>
+            </div>
+            <div class="card">
+                <div class="label">Acceleration</div>
+                <div class="value">${data.acceleration ? data.acceleration.toFixed(2) : '—'} <small>m/s²</small></div>
+            </div>
+            <div class="card">
+                <div class="label">Temperature</div>
+                <div class="value">${data.temperature ? data.temperature.toFixed(1) : '—'} <small>°C</small></div>
+            </div>
+            <div class="card">
+                <div class="label">Pressure</div>
+                <div class="value">${data.pressure ? data.pressure.toFixed(1) : '—'} <small>Pa</small></div>
+            </div>
+            <div class="card">
+                <div class="label">accelX</div>
+                <div class="value">${data.accelX ? data.accelX.toFixed(2) : '—'} <small>m/s²</small></div>
+            </div>
+            <div class="card">
+                <div class="label">accelY</div>
+                <div class="value">${data.accelY ? data.accelY.toFixed(2) : '—'} <small>m/s²</small></div>
+            </div>
+            <div class="card">
+                <div class="label">accelZ</div>
+                <div class="value">${data.accelZ ? data.accelZ.toFixed(2) : '—'} <small>m/s²</small></div>
+            </div>
+            <div class="card">
+                <div class="label">Status</div>
+                <div class="value">${data.status ? data.status : '-'}</div>
+            </div>
+        `;
+    }
+
+    function startRecording() {
+        const name = document.getElementById("sessionName").value.trim() || "Untitled Test";
+        fetch(`/api/record/start?name=${encodeURIComponent(name)}`, { method: 'POST' })
+            .then(() => updateStatus("● RECORDING", "#00ff41"));
+    }
+
+    function stopRecording() {
+        fetch('/api/record/stop', { method: 'POST' })
+            .then(() => updateStatus("Recording Saved", "#ffff00"));
+    }
+
+  function setMode(mode) {
+        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('btn-' + mode).classList.add('active');
+
+        if(mode === 'test') {
+            fetch('/api/test/start', {method: 'POST'});
+            updateStatus('Test data mode', '#ffaa00');
+        } else if(mode === 'live') {
+            fetch('/api/test/stop', {method: 'POST'});
+            updateStatus('Live Data', '#00ff41');
+        } else {
+            fetch('/api/test/stop', {method: 'POST'});
+            updateStatus('STANDBY', '#888');
+        }
+    }
+
+    function updateStatus(text, color) {
+        const status = document.getElementById("recordingStatus");
+        status.innerHTML = text;
+        status.style.color = color;
+    }
+
+    //dashboard on page load
+    updateLiveDashboard({
+        altitude: null,
+        velocity: null,
+        acceleration: null,
+        temperature: null,
+        pressure: null,
+        accel_x: null,
+        accel_y: null,
+        accel_z: null,
+        status: null,
+        });
+
+    // Initialize
+    connectWebSocket();
+</script>
+</body>
+</html>

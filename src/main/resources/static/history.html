@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Past Recordings</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <style>
+        body { background: #0a0a0a; color: #e0e0e0; font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; }
+        h1 { color: #00ff41; }
+        .recording { background: #1a1a1a; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="left-header">
+        <a href="index.html" class="button">← Back to Live Dashboard</a>
+    </div>
+    <div class="center-header">
+        <h1>Past Recordings</h1>
+    </div>
+</div>
+
+<div id="historyList"></div>
+
+<script>
+    //fetch all the recordings and display them if nothing found state that
+    fetch('/api/recording/sessions')
+        .then(res => res.json())
+        .then(sessions => {
+            const container = document.getElementById("historyList");
+            if (sessions.length === 0) {
+                container.innerHTML = "<p>No recordings yet.</p>";
+                return;
+            }
+            container.innerHTML = sessions.map(s => `
+                <div class="recording-item">
+                    <strong>${s.name}</strong><br>
+                    Started: ${new Date(s.startTime).toLocaleString()}<br>
+                    ${s.endTime ? 'Ended: ' + new Date(s.endTime).toLocaleString() : 'Still Active'}
+                    <br>
+                    <a href="recording-detail.html?id=${s.id}" class="button">View</a>
+                    <button onclick="deleteSession(${s.id})"class="stop">Delete</button>
+                </div>
+            `).join('');
+        });
+    //delete function for each session
+    function deleteSession(id) {
+        if(!confirm("Delete this recording? This cannot be undone.")) return;
+        fetch(`/api/recording/sessions/${id}`, {method: 'DELETE'})
+            .then(() => location.reload());
+    }
+
+</script>
+</body>
+</html>

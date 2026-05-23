@@ -1,0 +1,286 @@
+:root {
+    --bg: #0a0a0a;
+    --card: #1a1a1a;
+    --accent: #00ff41;
+    --text: #e0e0e0;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    padding: 20px;
+}
+
+.left-header {
+    display: flex;
+    justify-content: flex-start;
+}
+
+
+h1 {
+    color: var(--accent);
+    text-align: center;
+    margin: 0;
+}
+
+h2 {
+    color: var(--accent);
+    text-align: left;
+    margin-bottom: 15px;
+    margin-top: 30px;
+}
+
+.controls {
+    text-align: center;
+    margin: 20px 0;
+    padding: 15px;
+    background: var(--card);
+    border-radius: 12px;
+    }
+
+input[type="text"] {
+    padding: 10px;
+    width: 320px;
+    margin-right: 10px;
+    border-radius: 6px;
+    border: none;
+    }
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    }
+
+.start {
+    background: #00cc00;
+    color: white;
+    }
+
+.stop {
+    background: #cc0000;
+    color: white;
+    }
+
+.mode-selector {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 10px 0;
+}
+
+.mode-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 2px solid #444;
+    background: transparent;
+    color: #888;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: all 0.3s ease;
+}
+
+.mode-btn.active {
+    background-color: #00cc00;
+    color: var(--text);
+    border-color: rgba(0, 255, 65, 0.1);
+}
+
+/* taken out of code
+.test {
+    background: #0066ff;
+    color: white;
+    }
+*/
+.status {
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+
+.button {
+    background-color: #008000;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.button:hover {
+    background-color: #3e5f5f;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+
+.dummy-mode {
+    color: #ffaa00;
+    font-weight: bold;
+}
+
+.scrub-description {
+    font-size: 1em;
+    color: #fff;
+    text-align: left;
+}
+
+/* div containers */
+.container {
+    max-width: 1200px;
+    margin: 0 auto 50px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 255, 65, 0.1);
+    border: 1px solid #333;
+}
+
+.value {
+    font-size: 2.8em;
+    font-weight: bold;
+    color: var(--accent);
+    margin: 10px 0;
+}
+
+.label {
+    font-size: 1.1em;
+    color: #888;
+    text-transform: uppercase;
+}
+
+.status {
+    padding: 10px 16px;
+    border-radius: 8px;
+    display: inline-block;
+    font-weight: bold;
+}
+
+.summaryGrid {
+    max-width: 1200px;
+    margin: 0 auto 50px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.summary-item {
+    background: var(--card);
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    border: 1px solid #333;
+    box-shadow: 0 4px 15px rgba(0, 255, 65, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 75px;
+}
+
+.value-sum {
+    font-size: 1.5em;
+    color: #ffaa00;
+}
+
+.summary-item .label {
+    font-size: 0.75em;
+}
+
+
+/***********************/
+
+
+
+.connected { background: #004d00; color: #00ff41; }
+
+/* past recordings page */
+
+.past-recordings {
+    margin-top: 40px;
+}
+
+.recording-item {
+    background: var(--card);
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    }
+
+.recording-item:hover {
+    background: #252525;
+    }
+
+/* the track — the bar the thumb slides along */
+input[type="range"] {
+    -webkit-appearance: none;  /* turns off the browser default so your styles take over */
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: #333;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+/* the thumb — the circle the user drags */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    cursor: pointer;
+}
+
+input[type="range"]:hover {
+    background: #444;
+    }
+
+
+.playback-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px 0;
+    }
+
+.scrub-btn {
+    background-color: #2f4f4f;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.scrub-btn:hover {
+    background-color: #3e5f5f;
+}
+
+

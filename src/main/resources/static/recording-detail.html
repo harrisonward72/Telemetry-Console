@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recording Details</title>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+
+<div class="header">
+    <div class="left-header">
+        <a href="history.html" class="button">← Back to Records</a>
+    </div>
+    <div class="center-header">
+        <h1 id="sessionTitle">Test Header</h1>
+    </div>
+</div>
+
+<p id="sessionMetaData"></p>
+
+
+<h2>Summary</h2>
+<div class="summaryGrid" id="summaryGrid"></div>
+
+<h2>Playback</h2>
+<p id="currentTimeStamp"></p>
+
+<div id="liveDashboard" class="container"></div>
+
+
+<p class="scrub-description">Drag and scroll to view the data throughout the experiment.</p>
+<input type="range" id="scrubber" min="0" value="0">
+<div class="playback-controls">
+    <button class="scrub-btn" onclick="play()">&#9654</button>
+    <button class="scrub-btn" onclick="pause()">&#9208</button>
+</div>
+
+<script>
+    let dataPoints = [];
+    let currentIndex = 0;
+    let playInterval = null;
+    const scrubber = document.getElementById('scrubber');
+    //view an individual session
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('id');
+    if(!sessionId) {
+        document.getElementById('sessionTitle').textContent = 'No session id found';
+    } else {
+        console.log('Session ID is: ', sessionId);
+        loadSession(sessionId);
+    }
+
+    //load the session
+    function loadSession(id) {
+        fetch(`/api/recording/sessions/${id}`)
+            .then(res => res.json())
+            .then(session => {
+                document.getElementById('sessionTitle').textContent = session.name;
+                document.getElementById('sessionMetaData').textContent = 'Test Started At: ' + new Date(session.startTime).toLocaleString();
+                dataPoints = session.dataPoints;
+                document.getElementById('scrubber').max = dataPoints.length - 1;
+                renderCards(dataPoints[0]);
+                buildSummary(dataPoints);
+                });
+    }
+
+    //event listener for scrubber
+    scrubber.addEventListener('input', function() {
+        currentIndex = parseInt(scrubber.value);
+        const point = dataPoints[currentIndex];
+        renderCards(point);
+
+    //displays time for specific data point
+    const date = new Date(point.timestamp);
+    const formatted = date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+        });
+    document.getElementById('currentTimeStamp').textContent = formatted;
+    });
+
+    //populate div cards - same as in index.html
+    function renderCards(point) {
+    //made != null for altitude because 0 will return falsey and we want to see 0
+        document.getElementById('liveDashboard').innerHTML = `
+            <div class="card">
+                <div class="label">Altitude</div>
+                <div class= "value">${point.altitude != null ? point.altitude.toFixed(1) : '-'}<small>m</small></div>
+                </div>
+            <div class="card">
+                <div class="label">Velocity</div>
+                <div class= "value">${point.velocity ? point.velocity.toFixed(1) : '-'}<small>m/s</small></div>
+                </div>
+            <div class="card">
+                <div class="label">Acceleration</div>
+                <div class= "value">${point.acceleration ? point.acceleration.toFixed(2) : '-'}<small>m/s²</small></div>
+            </div>
+            <div class="card">
+                <div class="label">Temperature</div>
+                <div class= "value">${point.temperature ? point.temperature.toFixed(1) : '-'}<small>°C</small></div>
+            </div>
+            <div class="card">
+                <div class="label">Pressure</div>
+                <div class= "value">${point.pressure ? point.pressure.toFixed(1) : '-'}<small>Pa</small></div>
+            </div>
+            <div class="card">
+                <div class="label">accelX</div>
+                <div class= "value">${point.accelX ? point.accelX.toFixed(2) : '-'}<small>g</small></div>
+            </div>
+            <div class="card">
+                <div class="label">accelY</div>
+                <div class= "value">${point.accelY ? point.accelY.toFixed(2) : '-'}<small>g</small></div>
+            </div>
+            <div class="card">
+                <div class="label">accelZ</div>
+                <div class= "value">${point.accelZ ? point.accelZ.toFixed(2) : '-'}<small>g</small></div>
+            </div>
+            <div class="card">
+                <div class="label">Status</div>
+                <div class="value">${point.status ? point.status : '-'}</div>
+            </div>
+
+        `;
+    }
+
+
+    //function to populate summary data
+    function buildSummary(dataPoints) {
+
+        //scan through all data points
+        const maxAltitude = Math.max(...dataPoints.map(p => p.altitude || 0));
+        const maxSpeed = Math.max(...dataPoints.map(p => p.velocity || 0));
+        const avgSpeed = dataPoints.reduce((sum, p) => sum + (p.velocity || 0), 0) / dataPoints.length;
+        const maxAcceleration = Math.max(...dataPoints.map(p => p.acceleration || 0));
+        const maxTemperature = Math.max(...dataPoints.map(p => p.temperature || 0));
+        const avgTemperature = dataPoints.reduce((sum, p) => sum + (p.temperature || 0), 0) / dataPoints.length;
+        const minTemperature = Math.min(...dataPoints.map(p => p.temperature || 0));
+
+
+        const summary = document.getElementById('summaryGrid').innerHTML = `
+            <div class="summary-item">
+                <div class="label">Max Altitude</div>
+                <div class= "value-sum">${maxAltitude.toFixed(1)}<small>m</small></div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Max Speed</div>
+                <div class= "value-sum">${maxSpeed.toFixed(1)}<small>m/s</small></div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Avg Speed</div>
+                <div class= "value-sum">${avgSpeed.toFixed(1)}<small>m/s</small></div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Max Acceleration</div>
+                <div class= "value-sum">${maxAcceleration.toFixed(2)}<small>m/s²</small></div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Max Temperature</div>
+                <div class= "value-sum">${maxTemperature.toFixed(1)}<small>°C</small></div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Avg Temperature</div>
+                <div class= "value-sum">${avgTemperature.toFixed(1)}<small>°C</small></div>
+            </div>
+            <div class="summary-item">
+                <div class="label">Min Temperature</div>
+                <div class= "value-sum">${minTemperature.toFixed(1)}<small>°C</small></div>
+            </div>
+        `;
+    }
+
+    //JS for automatic scrub playback
+    function play() {
+        playInterval = setInterval(function() {
+            currentIndex++;
+            if (currentIndex >= dataPoints.length) {
+                pause();
+                return;
+            }
+            scrubber.value = currentIndex;
+            renderCards(dataPoints[currentIndex]);
+        }, 200);
+    }
+
+    function pause() {
+        clearInterval(playInterval);
+        playInterval = null;
+    }
+
+
+</script>
+</body>
+</html>
