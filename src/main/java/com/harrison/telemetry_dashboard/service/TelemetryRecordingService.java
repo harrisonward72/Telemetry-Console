@@ -56,6 +56,7 @@ public class TelemetryRecordingService {
         point.setAccelY(data.getAccelY()!= null ? data.getAccelY() : 0.0);
         point.setAccelZ(data.getAccelZ()!= null ? data.getAccelZ() : 0.0);
         point.setStatus(data.getStatus()!= null ? data.getStatus() : "null");
+        point.setTimestamp(Instant.now());
 
         dataPointRepository.save(point);
     }
